@@ -6,24 +6,24 @@ A reentrancy attack occurs when a function makes an external call to another unt
 
 ### 📜 Involves two smart contracts.
 
-    1. A vulnerable contract with 10 eth.
-    2. An untrusted attacker’s contract that has 1 eth.
+    1. A vulnerable contract with eth deposited from victims.
+    2. A malicious contract where an attacker sends 1 eth to attack.
 
 ### 🪜 Steps
 
-    1. Malicious SC stores 1 eth using the deposit function of the vulnerable contract.
+    1. Attacker deposits 1 eth to vulnerable sc through malicious sc attack function.
 
-    2. Malicious SC calls the withdraw function.
+    2. Malicious SC calls the withdraw function to withdraw 1 eth.
 
     3. Now withdraw function will verify if it can be executed
 
-        * Does the attacker have enough balance? Yes.
+        * Does the attacker have enough balance? Yes, he deposited 1 eth.
 
-        * Transfers 1 eth to a malicious SC without updating balance
+        * Transfers 1 eth to a malicious SC without updating balance.
 
-        * Fallback function receives eth on malicious SC and calls withdraw again.
+        * Fallback function receives eth on malicious SC and calls withdraw again before vulnerable sc updates balance.
 
-    4. Step 3. repeated until funds are fully drained from vulnerable SC.
+    4. Repeat from step 3. until funds are fully drained from vulnerable SC.
 
 ## How to prevent it
 

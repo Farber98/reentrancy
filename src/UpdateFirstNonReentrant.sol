@@ -4,14 +4,15 @@ pragma solidity ^0.8.13;
 contract UpdateFirstNonReentrant {
     mapping(address => uint256) public balance;
 
-    function deposit(uint256 _amount) public payable {
-        balance[msg.sender] += _amount;
+    function deposit() public payable {
+        balance[msg.sender] += msg.value;
     }
 
-    function withdraw(uint256 _amount) public {
-        require(balance[msg.sender] > 0, "Nothing to withdraw.");
-        balance[msg.sender] -= _amount;
-        (bool success, ) = msg.sender.call{value: _amount}("");
+    function withdraw() public {
+        uint256 bal = balance[msg.sender];
+        require(bal > 0, "Nothing to withdraw.");
+        balance[msg.sender] = 0;
+        (bool success, ) = msg.sender.call{value: bal}("");
         require(success, "withdraw failed.");
     }
 }

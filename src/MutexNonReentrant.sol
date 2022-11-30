@@ -12,14 +12,15 @@ contract MutexNonReentrant {
         locked = false;
     }
 
-    function deposit(uint256 _amount) public payable {
-        balance[msg.sender] += _amount;
+    function deposit() public payable {
+        balance[msg.sender] += msg.value;
     }
 
-    function withdraw(uint256 _amount) public noReentrant {
-        require(balance[msg.sender] > 0, "Nothing to withdraw.");
-        (bool success, ) = msg.sender.call{value: _amount}("");
+    function withdraw() public noReentrant {
+        uint256 bal = balance[msg.sender];
+        require(bal > 0, "Nothing to withdraw.");
+        (bool success, ) = msg.sender.call{value: bal}("");
         require(success, "withdraw failed.");
-        balance[msg.sender] -= _amount;
+        balance[msg.sender] = 0;
     }
 }

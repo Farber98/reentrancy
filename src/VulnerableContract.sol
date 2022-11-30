@@ -8,10 +8,11 @@ contract VulnerableContract {
         balance[msg.sender] += msg.value;
     }
 
-    function withdraw(uint256 _amount) public {
-        require(balance[msg.sender] > 0, "Nothing to withdraw.");
-        (bool success, ) = msg.sender.call{value: _amount}("");
+    function withdraw() public {
+        uint256 bal = balance[msg.sender];
+        require(bal > 0, "Nothing to withdraw.");
+        (bool success, ) = msg.sender.call{value: bal}("");
         require(success, "withdraw failed.");
-        balance[msg.sender] -= _amount;
+        balance[msg.sender] = 0;
     }
 }
